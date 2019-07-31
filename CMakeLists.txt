@@ -28,7 +28,7 @@ target_compile_options(main PRIVATE -Wall -Wextra -pedantic -Werror )
 target_compile_options(library PRIVATE -Wall -Wextra -pedantic -Werror )
 target_compile_options(gtests PRIVATE -Wall -Wextra -pedantic -Werror )
 
-install(TARGETS ip_filter RUNTIME DESTINATION bin)
+install(TARGETS main RUNTIME DESTINATION bin)
 
 set(CPACK_GENERATOR DEB)
 set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
