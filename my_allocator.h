@@ -39,8 +39,9 @@ namespace homework {
                 return pointer;
             }
 
-            void deallocate(T* p, [[maybe_unused]] size_t n) {
+            void deallocate(T* p,  size_t n) {
                 UNUSED(p);
+                UNUSED(n);
             }
 
 
