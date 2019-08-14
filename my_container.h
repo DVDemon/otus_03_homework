@@ -3,51 +3,49 @@
 #include <memory>
 
 namespace homework {
-    template <class T> 
+    template <class T, class Allocator> 
     class my_container{
         public:
+            // list node 
             struct my_node{
                 T value;
-                std::shared_ptr<my_node> next;
+                my_node* next;
 
                 my_node() : value{},next{}{
                 };
-                my_node(const T& v,const std::shared_ptr<my_node> n): value(v),next(n){
+                my_node( T& v,my_node* n): value(v),next(n){
                 }
             };
 
-
+            // one way iterator
             class my_iterator{
                 private:
-                    std::weak_ptr<my_node> _index;
+                    my_node* _index;
                 public:
-                    my_iterator(std::weak_ptr<my_node> index): _index(index){
+                    my_iterator(my_node* index): _index(index){
                     }
 
                     my_iterator& operator++(){
-                        if(std::shared_ptr<my_node> ptr=_index.lock()){
-                            if(ptr->next){
-                                _index = std::weak_ptr<my_node>(ptr->next);
-                            } else
-                                _index = std::weak_ptr<my_node>();
-                            
-                        }
+                        if(_index){
+                            _index = _index->next;
+                        } else 
+                            throw std::logic_error("Out of range");
                         return *this;
                     }
 
                     T&  operator*(){
-                        if(std::shared_ptr<my_node> ptr=_index.lock()){
-                            return ptr->value;
-                        }
-                        throw std::exception();
+                        if(_index){
+                            return _index->value;
+                        } else
+                            throw std::logic_error("Out of range");
                     }
 
                     bool operator!=(const my_iterator& other){
-                        return _index.lock()!=other._index.lock();
+                        return _index!=other._index;
                     }
 
-                    std::shared_ptr<my_node> get_node(){
-                        return _index.lock();
+                    my_node* get_node(){
+                        return _index;
                     }
 
             };
@@ -60,16 +58,16 @@ namespace homework {
             }
 
             my_iterator end(){
-                return my_iterator(std::make_shared<my_node>());
+                return my_iterator(nullptr);
             }
             T& at(size_t index){
-                size_t current_index{};
-                std::shared_ptr<my_node> current=_head;
+                size_t   current_index{};
+                my_node* current=_head;
                 while((current_index<index)) {
                       if(current->next){
                         current=current->next;
                         current_index++;
-                      } else throw std::exception();
+                      } else throw std::logic_error("Out of range");
                 }
                 return current->value;
             }
@@ -88,11 +86,14 @@ namespace homework {
 
             my_iterator erase(my_iterator it){
 
-                std::shared_ptr<my_node> current=_head,to_delete=it.get_node();
+                my_node* current=_head;
+                my_node* to_delete=it.get_node();
 
                 if(!to_delete) return end();
                 if(_head == to_delete){
                     _head = _head->next;
+                    _allocator_my_node.destroy(to_delete);
+                    _allocator_my_node.deallocate(to_delete,1);
                 } else {
                     current=_head;
                     while(current->next!=to_delete){
@@ -101,6 +102,8 @@ namespace homework {
                     }
                     if(current->next==to_delete){
                         current->next = to_delete->next;
+                        _allocator_my_node.destroy(to_delete);
+                        _allocator_my_node.deallocate(to_delete,1);
                         return my_iterator(current);
                     }
                 }
@@ -110,12 +113,16 @@ namespace homework {
             }
 
             void push_back( T&& value ){
+                
+                my_node *pointer =  _allocator_my_node.allocate(1);
+                _allocator_my_node.construct(pointer,value,nullptr);
+
                 if(_head){
-                    std::shared_ptr<my_node> last=_head;
+                    my_node* last=_head;
                     while(last->next) last=last->next;
-                    last->next = std::make_shared<my_node>(value,nullptr);
+                    last->next = pointer;
                 } else {
-                    _head = std::make_shared<my_node>(value,nullptr);
+                    _head = pointer;
                 }
             }
 
@@ -127,7 +134,11 @@ namespace homework {
             }
 
         private:
-            std::shared_ptr<my_node> _head;
+            typedef typename  Allocator::template rebind<my_node>::other my_node_allocator_type;
+            my_node_allocator_type _allocator_my_node;
+
+            my_node* _head{};
+
 
     };
  

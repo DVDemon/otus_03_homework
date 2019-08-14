@@ -1,20 +1,30 @@
 #ifndef MY_ALLOCATOR
 #define MY_ALLOCATOR
-#include <list>
+#include <bitset>
+#include <vector>
 
 namespace homework {
     template<class T,size_t BLOCK_SIZE>
     class my_allocator {
         private:
-            std::list<T*> _blocks;
+            T* _buffer;
+            size_t _free_index;
+
         public:
             using value_type = T;
             using pointer = T * ;
             using const_pointer = const T*;
             using size_type = std::size_t;
 
-            my_allocator(){
+            my_allocator() : _free_index(0) {
+                static_assert(BLOCK_SIZE>0);
+                _buffer = (T*) malloc(sizeof(T)*BLOCK_SIZE);
             }
+
+            ~my_allocator(){
+                free(_buffer);
+            }
+
             
             template<typename U>
             struct rebind {
@@ -22,15 +32,15 @@ namespace homework {
             };
 
             T* allocate(size_t n) {
-                auto p = std::malloc(n * sizeof(T));
-                if (!p) {
-                    throw std::bad_alloc();
-                }
-                return reinterpret_cast<T*>(p);
+                if((BLOCK_SIZE-_free_index)<n) throw std::bad_alloc();
+                T* pointer = (_buffer+_free_index);
+                _free_index+=n;
+
+                return pointer;
             }
 
             void deallocate(T* p, [[maybe_unused]] size_t n) {
-                std::free(p);
+                UNUSED(p);
             }
 
 
