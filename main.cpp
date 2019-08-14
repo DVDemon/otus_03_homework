@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
  map_type_with_allocator my_map_with_allocator;
  fill_map<9>(my_map_with_allocator);
 
- for(auto [key,value]:my_map_with_allocator) std::cout << key << " " << value << std::endl;
+ for(auto p:my_map_with_allocator) std::cout << p.first << " " << p.second << std::endl;
 
  homework::my_container<int,std::allocator<int>> container;
  for(size_t i=0;i<10;i++) container.push_back(i);
