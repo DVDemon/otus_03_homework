@@ -1,6 +1,7 @@
 #ifndef MY_CONTAINER
 #define MY_CONTAINER
-#include <memory>
+
+#include <stdexcept>
 
 namespace homework {
     template <class T, class Allocator> 
@@ -13,7 +14,7 @@ namespace homework {
 
                 my_node() : value{},next{}{
                 };
-                my_node( T& v,my_node* n): value(v),next(n){
+                my_node( T&& v,my_node* n): value(v),next(n){
                 }
             };
 
@@ -60,6 +61,7 @@ namespace homework {
             my_iterator end(){
                 return my_iterator(nullptr);
             }
+
             T& at(size_t index){
                 size_t   current_index{};
                 my_node* current=_head;
@@ -73,11 +75,7 @@ namespace homework {
             }
 
             T& operator[](size_t index){
-                return std::ref(at(index));
-            }
-
-            size_t max_size() const noexcept { 
-                return size();
+                return at(index);
             }
 
             bool empty() const noexcept {
@@ -111,11 +109,11 @@ namespace homework {
                 return end();
                 
             }
-
-            void push_back( T&& value ){
+            template <class TT>
+            void push_back( TT&& value ){
                 
                 my_node *pointer =  _allocator_my_node.allocate(1);
-                _allocator_my_node.construct(pointer,value,nullptr);
+                _allocator_my_node.construct(pointer,T(value),nullptr);
 
                 if(_head){
                     my_node* last=_head;

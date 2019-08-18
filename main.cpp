@@ -17,7 +17,7 @@ template <int N> void fill_map(map_type &map){
     fill_map<N-1>(map);
 }
 
-template <> void fill_map<-0>(map_type &map){
+template <> void fill_map<0>(map_type &map){
     map.insert(std::pair<int,int>(0,factorial<0>()));
 }
 
@@ -26,7 +26,7 @@ template <int N> void fill_map(map_type_with_allocator &map){
     fill_map<N-1>(map);
 }
 
-template <> void fill_map<-0>(map_type_with_allocator &map){
+template <> void fill_map<0>(map_type_with_allocator &map){
     map.insert(std::pair<int,int>(0,factorial<0>()));
 }
 
@@ -45,7 +45,8 @@ int main(int argc, char* argv[]){
 
  homework::my_container<int,homework::my_allocator<int,10>> container_with_my_allocator;
  for(size_t i=0;i<10;i++) container_with_my_allocator.push_back(i);
- for(auto i: container) std::cout<< i << std::endl;
+ for(auto i: container_with_my_allocator) std::cout<< i << std::endl;
+
 
 
  UNUSED(argc);

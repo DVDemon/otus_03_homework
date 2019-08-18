@@ -1,7 +1,5 @@
 #ifndef MY_ALLOCATOR
 #define MY_ALLOCATOR
-#include <bitset>
-#include <vector>
 
 namespace homework {
     template<class T,size_t BLOCK_SIZE>
@@ -16,9 +14,9 @@ namespace homework {
             using const_pointer = const T*;
             using size_type = std::size_t;
 
-            my_allocator() : _free_index(0) {
+            my_allocator() :  _buffer{},_free_index(0) {
                 static_assert(BLOCK_SIZE>0);
-                _buffer = (T*) malloc(sizeof(T)*BLOCK_SIZE);
+                
             }
 
             ~my_allocator(){
@@ -32,6 +30,8 @@ namespace homework {
             };
 
             T* allocate(size_t n) {
+                if(!_buffer) _buffer = (T*) malloc(sizeof(T)*BLOCK_SIZE);
+
                 if((BLOCK_SIZE-_free_index)<n) throw std::bad_alloc();
                 T* pointer = (_buffer+_free_index);
                 _free_index+=n;
