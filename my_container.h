@@ -14,7 +14,7 @@ namespace homework {
 
                 my_node() : value{},next{}{
                 };
-                my_node( T&& v,my_node* n): value(v),next(n){
+                my_node(const T&& v, my_node* const n): value(v),next(n){
                 }
             };
 
